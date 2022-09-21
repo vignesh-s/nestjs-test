@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { MenuItem } from './entities/menu-item.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
 export class MenuItemsService {
   constructor(
     @InjectRepository(MenuItem)
     private menuItemRepository: Repository<MenuItem>,
+    @InjectDataSource() private dataSoure: DataSource,
   ) {}
 
   /*
@@ -84,6 +85,6 @@ export class MenuItemsService {
     ]
   */
   async getMenuItems() {
-    throw new Error('TODO in task 3');
+    return this.dataSoure.manager.getTreeRepository(MenuItem).findTrees();
   }
 }
