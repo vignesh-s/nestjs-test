@@ -2,6 +2,7 @@ import { Repository } from 'typeorm';
 import { Get, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Event } from './entities/event.entity';
+import { Workshop } from './entities/workshop.entity';
 
 @Injectable()
 export class EventsService {
@@ -92,7 +93,15 @@ export class EventsService {
 
   @Get('events')
   async getEventsWithWorkshops() {
-    throw new Error('TODO task 1');
+    return this.eventRepository
+      .createQueryBuilder('event')
+      .innerJoinAndMapMany(
+        'event.workshops',
+        Workshop,
+        'workshop',
+        'event.id = workshop.eventId',
+      )
+      .getMany();
   }
 
   /*
