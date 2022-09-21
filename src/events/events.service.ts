@@ -171,6 +171,16 @@ export class EventsService {
      */
   @Get('futureevents')
   async getFutureEventWithWorkshops() {
-    throw new Error('TODO task 2');
+    const now = new Date().toISOString();
+    return this.eventRepository
+      .createQueryBuilder('event')
+      .innerJoinAndMapMany(
+        'event.workshops',
+        Workshop,
+        'workshop',
+        'event.id = workshop.eventId',
+      )
+      .where('workshop.start > :now', { now })
+      .getMany();
   }
 }
