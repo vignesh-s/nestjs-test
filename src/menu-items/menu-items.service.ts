@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
 import { MenuItem } from './entities/menu-item.entity';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
 export class MenuItemsService {
   constructor(
     @InjectRepository(MenuItem)
     private menuItemRepository: Repository<MenuItem>,
-    @InjectDataSource() private dataSoure: DataSource,
   ) {}
 
   /*
@@ -85,6 +85,44 @@ export class MenuItemsService {
     ]
   */
   async getMenuItems() {
-    return this.dataSoure.manager.getTreeRepository(MenuItem).findTrees();
+    const allMenuItems = await this.menuItemRepository.find();
+    const rootMenus = [];
+    for (const menuItem of allMenuItems) {
+      for (const menuItemToCompare of allMenuItems) {
+        if (menuItem.id == menuItemToCompare.parentId) {
+          if (!menuItem.children) {
+            menuItem.children = [];
+          }
+          menuItem.children.push(menuItemToCompare);
+        }
+      }
+      if (menuItem.parentId == null) {
+        rootMenus.push(menuItem);
+      }
+    }
+    return rootMenus;
+  }
+
+  async getMenuItemsFast() {
+    const allMenuItems = await this.menuItemRepository.find();
+    const rootMenus = [];
+    const mapping = new Map<number, MenuItem>;
+    for (let i = 0; i < allMenuItems.length; i++) {
+      const menuItem = allMenuItems[i];
+      if (menuItem.parentId == null) {
+        rootMenus.push(menuItem);
+      } else if (mapping.has(menuItem.parentId)) {
+        const parent = mapping.get(menuItem.parentId);
+        if (!parent) {
+          continue;
+        }
+        if (!parent.children) {
+          parent.children = [];
+        }
+        parent.children.push(menuItem);
+      }
+      mapping.set(menuItem.id, menuItem);
+    }
+    return rootMenus;
   }
 }

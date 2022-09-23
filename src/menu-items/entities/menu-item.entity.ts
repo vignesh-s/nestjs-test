@@ -1,17 +1,6 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  Tree,
-  TreeChildren,
-  TreeParent,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-// @Tree('nested-set')
 export class MenuItem {
   @PrimaryGeneratedColumn()
   id: number;
@@ -28,12 +17,5 @@ export class MenuItem {
   @Column({ type: 'datetime' })
   createdAt: string;
 
-  @OneToMany((type) => MenuItem, (menuItem) => menuItem.id)
   children: MenuItem[];
-
-  // @TreeChildren()
-  // children: MenuItem[];
-
-  // @TreeParent()
-  // parent: MenuItem;
 }
